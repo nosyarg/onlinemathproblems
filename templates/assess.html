@@ -6,11 +6,9 @@
 
 {% block body %}
 <p>
-This is the my assignments page
-{% for a in assessments %}
-    {% if a.owner == current_user.username %}
-    <p> <a href = "/viewassessment/{{a.idnum}}">Assesment: {{a.idnum}}</a></p>
-    {% endif %}
+This is the assess page
+{% for q in questions %}
+    <p> {{q.text}}</p>
 {% endfor %}
 </p>
 {% endblock %}

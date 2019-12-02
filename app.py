@@ -71,12 +71,19 @@ def assess(idnum):
     for current in allassessments:
         if(current.idnum == idnum):
            thisassessment = current 
-           #break
-    return render_template('assess.html',thisassessment=thisassessment)
+    problemnums = eval(thisassessment.questionlist)
+    #print(problemnums)
+    questions = []
+    for i in problemnums:
+        question = Problem.query.filter_by(idnum = i).first()
+        questions.append(question)
+    #print(questions[0].text)
+    return render_template('assess.html',questions=questions)
 
 @app.route('/availableassessments')
 def availableassessments():
-    return render_template('availableassessments.html')
+    assessments = Assessment.query.order_by(Assessment.idnum)
+    return render_template('availableassessments.html',assessments=assessments)
 
 @app.route('/newassessment', methods=['GET'])
 def newassessmentget():
@@ -130,8 +137,8 @@ def index():
 @app.route('/myassessments')
 def myassessments():
     assessments = Assessment.query.order_by(Assessment.idnum)
-    for assessment in (assessments):
-        print("assessment found")
+    #for assessment in (assessments):
+    #    print("assessment found")
     return render_template('myassessments.html',assessments=assessments)
 
 @app.route('/login', methods=['POST','GET'])
