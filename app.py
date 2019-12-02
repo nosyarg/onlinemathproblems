@@ -44,7 +44,7 @@ class Problem(db.Model):
     __bind_key__ = 'problems'
     idnum = db.Column(db.Integer(),primary_key=True)
     text = db.Column(db.String(100),nullable=True) 
-    inputs = db.Column(db.String(1000),nullable=False) 
+    inputs = db.Column(db.String(1000),nullable=True) 
     answer = db.Column(db.String(1000),nullable=False) 
 
 class Assessment(db.Model):
@@ -62,24 +62,26 @@ def load_user(username):
             return current
 
 @app.route('/newassessment', methods=['GET'])
-def newassessment():
+def newassessmentget():
     return render_template('newassessment.html')
 
 @app.route('/newassessment', methods=['POST'])
-def newassessment():
+def newassessmentpost():
     numquestions = int(request.form['numquestions'])
     inputlist = []
     for i in range(numquestions):
         import questions.factoring
-        a = int(10*random())
-        b = int(10*random())
-        c = int(10*random())
-        nextproblem = Problem
-        (
-            idnum = Problem.count(),
-            text = questions.factoring.gettext(a,b,c),
-            answer = questions.factoring.getanswer(a,b,c)
-        )
+        a = int(10*random()+1)
+        print(a)
+        b = int(10*random()+1)
+        print(b)
+        c = -int(10*random()+1)
+        print(c)
+        if(db.session.query(db.func.max(Problem.idnum)).scalar()== None):
+            newid = 0
+        else:
+            newid = db.session.query(db.func.max(Problem.idnum)).scalar()+1
+        nextproblem = Problem(idnum = newid+1,text = questions.factoring.gettext(a,b,c),answer = str(questions.factoring.getanswer(a,b,c)))
         try:
             __bind_key__ = 'problem'
             db.session.add(nextproblem)
@@ -87,17 +89,24 @@ def newassessment():
         except:
             return('problem creating assessment')
         inputlist.append(nextproblem.idnum)
-    completeassessment = Assessment
-    (
-        idnum = Assessment.count()
-        owner = current_user.name
-        questionlist = str(inputlist)
-    )
+    if(db.session.query(db.func.max(Assessment.idnum)).scalar()== None):
+        newid = 0
+    else:
+        newid = db.session.query(db.func.max(Assessment.idnum)).scalar()+1
+    completeassessment = Assessment(idnum = newid,owner = current_user.username,questionlist = str(inputlist))
     return render_template('newassessment.html')
+
+@app.route('/assessments')
+def assessments():
+    return render_template('assessments.html')
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/myassessments')
+def myassignemnts():
+    return render_template('myassessments.html')
 
 @app.route('/login', methods=['POST','GET'])
 def login():
