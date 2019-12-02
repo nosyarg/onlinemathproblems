@@ -61,6 +61,23 @@ def load_user(username):
         if(current.username == username):
             return current
 
+@app.route('/viewassessment/<int:idnum>')
+def viewassignment(idnum):
+    return "VIEWING" + str(idnum)
+
+@app.route('/assess/<int:idnum>')
+def assess(idnum):
+    allassessments = Assessment.query.order_by(Assessment.idnum).all()
+    for current in allassessments:
+        if(current.idnum == idnum):
+           thisassessment = current 
+           #break
+    return render_template('assess.html',thisassessment=thisassessment)
+
+@app.route('/availableassessments')
+def availableassessments():
+    return render_template('availableassessments.html')
+
 @app.route('/newassessment', methods=['GET'])
 def newassessmentget():
     return render_template('newassessment.html')
@@ -94,6 +111,12 @@ def newassessmentpost():
     else:
         newid = db.session.query(db.func.max(Assessment.idnum)).scalar()+1
     completeassessment = Assessment(idnum = newid,owner = current_user.username,questionlist = str(inputlist))
+    try:
+        __bind_key__ = 'assessment'
+        db.session.add(completeassessment)
+        db.session.commit()
+    except:
+        return('problem creating assessment')
     return render_template('newassessment.html')
 
 @app.route('/assessments')
@@ -105,8 +128,11 @@ def index():
     return render_template('index.html')
 
 @app.route('/myassessments')
-def myassignemnts():
-    return render_template('myassessments.html')
+def myassessments():
+    assessments = Assessment.query.order_by(Assessment.idnum)
+    for assessment in (assessments):
+        print("assessment found")
+    return render_template('myassessments.html',assessments=assessments)
 
 @app.route('/login', methods=['POST','GET'])
 def login():
