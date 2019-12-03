@@ -9,6 +9,8 @@
 This is the assess page
 {% for q in questions %}
     <p> {{q.text}}</p>
+    <input type="text" name="answer{{q.idnum}}">
 {% endfor %}
 </p>
+<input type="submit" name="submit" value="submit">
 {% endblock %}
